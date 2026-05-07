@@ -17,11 +17,13 @@ package org.springframework.ldap.core.support;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ldap.AuthenticationException;
 
 import javax.naming.Context;
 import java.util.Hashtable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class SimpleDirContextAuthenticationStrategyTest {
 	private SimpleDirContextAuthenticationStrategy tested;
@@ -49,5 +51,36 @@ public class SimpleDirContextAuthenticationStrategyTest {
 		assertThat(env.isEmpty()).isTrue();
 	}
 
+	@Test
+	public void setupEnvironmentWhenUserDnIsSetAndPasswordIsEmptyThenAuthenticationException() {
+		Hashtable<String, Object> env = new Hashtable<>();
+		assertThatExceptionOfType(AuthenticationException.class)
+			.isThrownBy(() -> this.tested.setupEnvironment(env, "cn=John Doe", ""));
+		assertThat(env).isEmpty();
+	}
+
+	@Test
+	public void setupEnvironmentWhenUserDnIsSetAndPasswordIsNullThenAuthenticationException() {
+		Hashtable<String, Object> env = new Hashtable<>();
+		assertThatExceptionOfType(AuthenticationException.class)
+			.isThrownBy(() -> this.tested.setupEnvironment(env, "cn=John Doe", null));
+		assertThat(env).isEmpty();
+	}
+
+	@Test
+	public void setupEnvironmentWhenUserDnAndPasswordAreEmptyThenSucceeds() {
+		Hashtable<String, Object> env = new Hashtable<>();
+		this.tested.setupEnvironment(env, "", "");
+		assertThat(env.get(Context.SECURITY_AUTHENTICATION)).isEqualTo("simple");
+		assertThat(env.get(Context.SECURITY_PRINCIPAL)).isEqualTo("");
+		assertThat(env.get(Context.SECURITY_CREDENTIALS)).isEqualTo("");
+	}
+
+    @Test
+    public void setupEnvironmentPreservesWhitespacePassword() {
+        Hashtable<String, Object> env = new Hashtable<>();
+        tested.setupEnvironment(env, "cn=John Doe", " ");
+        assertThat(env.get(Context.SECURITY_CREDENTIALS)).isEqualTo(" ");
+    }
 
 }

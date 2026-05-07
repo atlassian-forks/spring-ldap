@@ -15,9 +15,12 @@
  */
 package org.springframework.ldap.core.support;
 
+import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of TLS authentication. Applies <code>SIMPLE</code>
@@ -33,6 +36,10 @@ public class DefaultTlsDirContextAuthenticationStrategy extends AbstractTlsDirCo
 	private static final String SIMPLE_AUTHENTICATION = "simple";
 
 	protected void applyAuthentication(LdapContext ctx, String userDn, String password) throws NamingException {
+		if (StringUtils.hasLength(userDn) && !StringUtils.hasLength(password)) {
+			// Let AbstractContextSource close the context before translating the exception.
+			throw new AuthenticationException("password must be provided when userDn is set");
+		}
 		ctx.addToEnvironment(Context.SECURITY_AUTHENTICATION, SIMPLE_AUTHENTICATION);
 		ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDn);
 		ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
