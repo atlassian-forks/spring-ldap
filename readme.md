@@ -1,8 +1,94 @@
 ## Spring LDAP
 
+This is the Atlassian fork of Spring LDAP 2.4.4. See
+[Atlassian build and release instructions](ATLASSIAN.md) for the fork's versioning,
+build requirements and Maven publication commands.
+
 [![Join the chat at https://gitter.im/spring-projects/spring-ldap](https://badges.gitter.im/spring-projects/spring-ldap.svg)](https://gitter.im/spring-projects/spring-ldap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/spring-projects/spring-ldap.svg?branch=main)](https://travis-ci.org/spring-projects/spring-ldap)
+
+## Atlassian release
+
+The first fork release is `org.springframework.ldap:spring-ldap-core:2.4.4-atlassian-1`,
+built from branch `codex/release-2.4.4-atlassian-1`. It establishes the Atlassian
+build and publication setup on upstream 2.4.4. **It does not include the
+CVE-2026-41720 fix.** The security backport and FeCru integration validation are
+still required in a subsequent release.
+
+Use **JDK 17** to run Gradle; published library classes target **Java 8**.
+The release includes `spring-ldap-core`, `spring-ldap-core-tiger`,
+`spring-ldap-ldif-core`, `spring-ldap-odm`, and `spring-ldap-test`, each with its
+main, sources and Javadoc JARs, POM and Gradle module metadata.
+
+1. Create a release branch from the reviewed fork sources. For this release:
+
+   ```sh
+   git switch -c codex/release-2.4.4-atlassian-1
+   ```
+
+2. Set `version=2.4.4-atlassian-1` in `gradle.properties`. Later releases must use
+   a new `-atlassian-N` suffix; published versions must not be overwritten.
+
+3. Set `JAVA_HOME` to a JDK 17 installation. Configure the publishing credentials
+   in your local `~/.gradle/gradle.properties`:
+
+   ```properties
+   atlassianMavenUsername=<your-publishing-username>
+   atlassianMavenPassword=<your-publishing-password-or-token>
+   ```
+
+   Alternatively, use `ORG_GRADLE_PROJECT_atlassianMavenUsername` and
+   `ORG_GRADLE_PROJECT_atlassianMavenPassword` environment variables. Keep these
+   values out of Git and command-line arguments. Credentials are not required
+   for builds or local publication.
+
+4. Build, test and stage all five libraries locally:
+
+   ```sh
+   ./gradlew --no-daemon clean buildFork publishForkToLocal
+   git diff --check
+   ```
+
+   Inspect the artifacts under
+   `build/publications/repos/org/springframework/ldap/`. Verify their release
+   version, fork SCM metadata, Java 8 compatibility and inter-module dependency
+   versions. The build task excludes samples and standalone LDAP server suites;
+   run the integration checks appropriate to the changes being released.
+
+5. Review and commit the release changes, then publish from the clean release
+   checkout:
+
+   ```sh
+   ./gradlew --no-daemon publishFork
+   ```
+
+   This uploads only the five library modules to
+   `https://packages.atlassian.com/maven/3rdparty`. CI builds and stages locally;
+   it does not publish releases. If publication fails partway through, inspect
+   which artifacts were uploaded before retrying.
+
+6. Verify the POMs and JARs for all five modules through the Atlassian Maven
+   repository. For example:
+
+   ```sh
+   curl --fail --location https://packages.atlassian.com/maven-external/org/springframework/ldap/spring-ldap-core/2.4.4-atlassian-1/spring-ldap-core-2.4.4-atlassian-1.pom
+   ```
+
+   After successful publication, tag the exact release commit and push the
+   branch and tag to the fork:
+
+   ```sh
+   git tag -a 2.4.4-atlassian-1 -m "Release Spring LDAP 2.4.4-atlassian-1"
+   git push -u origin codex/release-2.4.4-atlassian-1
+   git push origin 2.4.4-atlassian-1
+   ```
+
+7. Continue development on a separate branch with
+   `version=2.4.4-atlassian-2-SNAPSHOT`, leaving the release tag unchanged.
+
+See [ATLASSIAN.md](ATLASSIAN.md) for focused build commands and dependency
+compatibility notes. The remaining sections describe the upstream project.
 
 ## Code of Conduct
 This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).

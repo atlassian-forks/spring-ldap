@@ -2,27 +2,53 @@ buildscript {
 	repositories {
 		gradlePluginPortal()
 		mavenCentral()
+		maven { url "https://packages.atlassian.com/maven/repository/public" }
 	}
     dependencies {
         classpath "com.github.ben-manes:gradle-versions-plugin:0.36.0"
 		classpath "io.spring.gradle:dependency-management-plugin:1.1.4"
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.28.2"
         classpath 'org.hidetake:gradle-ssh-plugin:2.10.1'
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0'
+    }
+}
+
+allprojects {
+    repositories {
+        // Resolve public artifacts directly before consulting the Atlassian mirror.
+        mavenCentral()
+        maven { url "https://packages.atlassian.com/maven/repository/public" }
     }
 }
 
 apply plugin: 'io.spring.convention.root'
 apply plugin: 'io.spring.convention.docs'
-apply plugin: 'io.spring.security.release'
 
 group = "org.springframework.ldap"
 description = "Spring LDAP"
 
-ext.coreModules = subprojects.findAll { p-> (!p.name.contains("test") && !p.name.contains("sample") && !p.name.contains("sandbox")) || p.name.contains("spring-ldap-test") }
+ext.coreModules = [
+    project(':spring-ldap-core'),
+    project(':spring-ldap-core-tiger'),
+    project(':spring-ldap-ldif-core'),
+    project(':spring-ldap-odm'),
+    project(':spring-ldap-test')
+]
 
-configure(subprojects - coreModules) {
-	tasks.findByPath("publishArtifacts")?.enabled = false
+tasks.register('buildFork') {
+    group = 'build'
+    description = 'Builds and checks the libraries published by the Atlassian fork.'
+    dependsOn coreModules.collect { "${it.path}:build" }
+}
+
+tasks.register('publishForkToLocal') {
+    group = 'publishing'
+    description = 'Publishes the fork libraries to build/publications/repos for inspection.'
+    dependsOn coreModules.collect { "${it.path}:publishMavenJavaPublicationToLocalRepository" }
+}
+
+tasks.register('publishFork') {
+    group = 'publishing'
+    description = 'Publishes the fork libraries to the Atlassian third-party Maven repository.'
+    dependsOn coreModules.collect { "${it.path}:publishArtifacts" }
 }
 
 nohttp {
@@ -48,14 +74,4 @@ asciidoctor {
 	options = [
 		eruby: 'erubis'
 	]
-}
-
-springRelease {
-    repositoryOwner = "spring-projects"
-    repositoryName = "spring-ldap"
-    weekOfMonth = 2
-    dayOfWeek = 4
-    referenceDocUrl = "https://docs.spring.io/spring-ldap/reference/{version}/index.html"
-    apiDocUrl = "https://docs.spring.io/spring-ldap/docs/{version}/api/"
-    replaceSnapshotVersionInReferenceDocUrl = true
 }
