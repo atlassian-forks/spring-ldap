@@ -62,9 +62,9 @@ public class MavenPublishingConventionsPlugin implements Plugin<Project> {
 	}
 
 	private void customizeScm(MavenPomScm scm) {
-		scm.getConnection().set("scm:git:git://github.com/spring-projects/spring-ldap.git");
-		scm.getDeveloperConnection().set("scm:git:ssh://git@github.com/spring-projects/spring-ldap.git");
-		scm.getUrl().set("https://github.com/spring-projects/spring-ldap");
+		scm.getConnection().set("scm:git:https://github.com/atlassian-forks/spring-ldap.git");
+		scm.getDeveloperConnection().set("scm:git:ssh://git@github.com/atlassian-forks/spring-ldap.git");
+		scm.getUrl().set("https://github.com/atlassian-forks/spring-ldap");
 	}
 
 	private void customizeIssueManagement(MavenPomIssueManagement issueManagement) {

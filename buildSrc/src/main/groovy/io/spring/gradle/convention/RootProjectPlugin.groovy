@@ -21,7 +21,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.PluginManager
-import org.springframework.gradle.maven.SpringNexusPublishPlugin
 
 class RootProjectPlugin implements Plugin<Project> {
 
@@ -31,7 +30,6 @@ class RootProjectPlugin implements Plugin<Project> {
 		pluginManager.apply(BasePlugin)
 		pluginManager.apply(SchemaPlugin)
 		pluginManager.apply(NoHttpPlugin)
-		pluginManager.apply(SpringNexusPublishPlugin)
 		pluginManager.apply("org.sonarqube")
 
 		project.repositories.mavenCentral()
@@ -50,10 +48,6 @@ class RootProjectPlugin implements Plugin<Project> {
 			}
 		}
 
-		def finalizeDeployArtifacts = project.task("finalizeDeployArtifacts")
-		if (Utils.isRelease(project) && project.hasProperty("ossrhUsername")) {
-			finalizeDeployArtifacts.dependsOn project.tasks.closeAndReleaseOssrhStagingRepository
-		}
 	}
 
 }

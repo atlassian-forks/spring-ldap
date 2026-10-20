@@ -10,7 +10,7 @@ sourceCompatibility = JavaVersion.VERSION_17
 repositories {
     gradlePluginPortal()
     mavenCentral()
-    maven { url 'https://repo.spring.io/plugins-release/' }
+    maven { url 'https://packages.atlassian.com/maven/repository/public' }
 }
 
 sourceSets {
@@ -91,7 +91,6 @@ dependencies {
     implementation 'com.github.ben-manes:gradle-versions-plugin:0.38.0'
     implementation 'com.github.spullara.mustache.java:compiler:0.9.4'
     implementation 'io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.15'
-    implementation 'io.spring.gradle:spring-security-release-plugin:1.0.1'
     implementation 'io.spring.nohttp:nohttp-gradle:0.0.10'
     implementation 'net.sourceforge.htmlunit:htmlunit:2.37.0'
     implementation 'org.asciidoctor:asciidoctor-gradle-jvm:3.3.2'
