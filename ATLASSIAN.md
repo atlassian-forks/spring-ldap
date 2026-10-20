@@ -30,11 +30,24 @@ artifacts before a release. For a focused core build:
   :spring-ldap-core:publishMavenJavaPublicationToLocalRepository
 ```
 
-The main build resolves dependencies first through Atlassian's public Maven
-repository and Maven Central. Upstream module conventions retain Spring and
-Shibboleth repositories as fallbacks. The library dependency versions remain
+The main build resolves dependencies from Maven Central first, then Atlassian's
+public Maven repository. This avoids relying on the mirror for artifacts available
+in Central: once Gradle selects a repository's metadata, it also fetches the JAR
+from that repository. Upstream module conventions retain Spring and Shibboleth
+repositories as fallbacks. The library dependency versions remain
 those of upstream 2.4.4; consumer-specific overrides, including FeCru's Spring/Crowd combination, require
 separate integration validation.
+
+To check dependency downloads as well as compilation and tests, use a fresh
+Gradle user home and disable reuse of task outputs:
+
+```sh
+./gradlew --no-daemon --gradle-user-home "$(mktemp -d)" \
+  --no-build-cache --rerun-tasks buildFork publishForkToLocal
+```
+
+This downloads the wrapper and dependencies again and requires no publishing
+credentials.
 
 ## Publish a release
 

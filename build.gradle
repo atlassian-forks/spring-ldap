@@ -1,8 +1,8 @@
 buildscript {
 	repositories {
-		maven { url "https://packages.atlassian.com/maven/repository/public" }
 		gradlePluginPortal()
 		mavenCentral()
+		maven { url "https://packages.atlassian.com/maven/repository/public" }
 	}
     dependencies {
         classpath "com.github.ben-manes:gradle-versions-plugin:0.36.0"
@@ -13,8 +13,9 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url "https://packages.atlassian.com/maven/repository/public" }
+        // Resolve public artifacts directly before consulting the Atlassian mirror.
         mavenCentral()
+        maven { url "https://packages.atlassian.com/maven/repository/public" }
     }
 }
 

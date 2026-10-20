@@ -4,15 +4,15 @@ pluginManagement {
     }
     repositories {
         gradlePluginPortal()
-        maven { url 'https://packages.atlassian.com/maven/repository/public' }
         mavenCentral()
+        maven { url 'https://packages.atlassian.com/maven/repository/public' }
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        maven { url "https://packages.atlassian.com/maven/repository/public" }
         mavenCentral()
+        maven { url "https://packages.atlassian.com/maven/repository/public" }
     }
 }
 
