@@ -10,24 +10,28 @@ build requirements and Maven publication commands.
 
 ## Atlassian release
 
-The first fork release is `org.springframework.ldap:spring-ldap-core:2.4.4-atlassian-1`,
-built from branch `codex/release-2.4.4-atlassian-1`. It establishes the Atlassian
-build and publication setup on upstream 2.4.4. **It does not include the
-CVE-2026-41720 fix.** The security backport and FeCru integration validation are
-still required in a subsequent release.
+This release is `org.springframework.ldap:spring-ldap-core:2.4.4-atlassian-2`,
+built from branch `codex/cve-2026-41720`. It includes the
+[CVE-2026-41720](https://spring.io/security/cve-2026-41720/) empty-password
+authentication fix, backported from upstream commit
+[`5cc73a6b`](https://github.com/spring-projects/spring-ldap/commit/5cc73a6b7fb1d2bcb950c4d69221c6d192d79795).
+The backport preserves TLS context cleanup when authentication is rejected.
+Full FeCru/Crowd integration validation is still required before product adoption.
+The previous `2.4.4-atlassian-1` release only established the fork's build and
+publication setup and does not contain this fix.
 
 Use **JDK 17** to run Gradle; published library classes target **Java 8**.
 The release includes `spring-ldap-core`, `spring-ldap-core-tiger`,
 `spring-ldap-ldif-core`, `spring-ldap-odm`, and `spring-ldap-test`, each with its
 main, sources and Javadoc JARs, POM and Gradle module metadata.
 
-1. Create a release branch from the reviewed fork sources. For this release:
+1. Check out the reviewed branch containing the security backport:
 
    ```sh
-   git switch -c codex/release-2.4.4-atlassian-1
+   git switch codex/cve-2026-41720
    ```
 
-2. Set `version=2.4.4-atlassian-1` in `gradle.properties`. Later releases must use
+2. Set `version=2.4.4-atlassian-2` in `gradle.properties`. Later releases must use
    a new `-atlassian-N` suffix; published versions must not be overwritten.
 
 3. Set `JAVA_HOME` to a JDK 17 installation. Configure the publishing credentials
@@ -68,24 +72,25 @@ main, sources and Javadoc JARs, POM and Gradle module metadata.
    it does not publish releases. If publication fails partway through, inspect
    which artifacts were uploaded before retrying.
 
-6. Verify the POMs and JARs for all five modules through the Atlassian Maven
-   repository. For example:
+6. Download all five published files for each module (main, sources and
+   Javadoc JARs, POM and Gradle module metadata) through the Atlassian Maven
+   repository and compare their SHA-256 hashes with the validated local
+   artifacts. For example, the core POM is available at:
 
    ```sh
-   curl --fail --location https://packages.atlassian.com/maven-external/org/springframework/ldap/spring-ldap-core/2.4.4-atlassian-1/spring-ldap-core-2.4.4-atlassian-1.pom
+   curl --fail --location https://packages.atlassian.com/maven-external/org/springframework/ldap/spring-ldap-core/2.4.4-atlassian-2/spring-ldap-core-2.4.4-atlassian-2.pom
    ```
 
    After successful publication, tag the exact release commit and push the
    branch and tag to the fork:
 
    ```sh
-   git tag -a 2.4.4-atlassian-1 -m "Release Spring LDAP 2.4.4-atlassian-1"
-   git push -u origin codex/release-2.4.4-atlassian-1
-   git push origin 2.4.4-atlassian-1
+   git tag -a 2.4.4-atlassian-2 -m "Release Spring LDAP 2.4.4-atlassian-2"
+   git push --atomic -u origin codex/cve-2026-41720 refs/tags/2.4.4-atlassian-2
    ```
 
 7. Continue development on a separate branch with
-   `version=2.4.4-atlassian-2-SNAPSHOT`, leaving the release tag unchanged.
+   `version=2.4.4-atlassian-3-SNAPSHOT`, leaving the release tag unchanged.
 
 See [ATLASSIAN.md](ATLASSIAN.md) for focused build commands and dependency
 compatibility notes. The remaining sections describe the upstream project.

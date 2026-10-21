@@ -20,6 +20,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ldap.AuthenticationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.verification.VerificationMode;
 import org.mockito.ArgumentMatcher;
@@ -1936,4 +1937,24 @@ public class LdapTemplateTest {
             }
         }
     }
+
+	@Test
+	public void authenticateWhenPasswordIsEmptyAndDefaultStrategyThenReturnsFalse() throws Exception {
+		when(this.contextSourceMock.getReadOnlyContext()).thenReturn(this.dirContextMock);
+
+		Object expectedObject = new DirContextAdapter(new BasicAttributes(), LdapUtils.newLdapName("cn=john doe"),
+				LdapUtils.newLdapName("dc=jayway, dc=se"));
+		SearchResult searchResult = new SearchResult("", expectedObject, new BasicAttributes());
+		singleSearchResult(searchControlsRecursive(), searchResult);
+
+		when(this.contextSourceMock.getContext("cn=john doe,dc=jayway,dc=se", ""))
+			.thenThrow(new AuthenticationException(
+					new javax.naming.AuthenticationException("password must be provided when userDn is set")));
+
+		boolean result = this.tested.authenticate(this.nameMock, "(ou=somevalue)", "", this.entryContextCallbackMock);
+
+		assertThat(result).isFalse();
+		verify(this.dirContextMock).close();
+	}
+
 }
